@@ -1,14 +1,14 @@
 import { BlogPost, Author, Category } from '@/types/blog';
 
 export const mockAuthor: Author = {
-  name: '你的真实姓名',
-  avatar: '/images/your-avatar.jpg',
-  bio: '这里写你的个人简介，可以包括你的专业背景、兴趣爱好、技术专长等。',
+  name: '赵龙飞',
+  avatar: '/images/zhaolongfei-avatar.jpg',
+  bio: '我是一名热爱技术创新的全栈开发工程师，精通Web前端开发、Python和C语言。在多年的开发实践中，我独立完成了众多前端网站项目，开发了多款Python小游戏，甚至动手实现了简单的电脑操作系统。',
   social: {
-    github: 'https://github.com/yourusername',
-    twitter: 'https://twitter.com/yourusername',
-    linkedin: 'https://linkedin.com/in/yourusername',
-    email: 'your.email@example.com'
+    github: 'https://github.com/zhaolongfei',
+    twitter: 'https://twitter.com/zhaolongfei_dev',
+    linkedin: 'https://linkedin.com/in/zhaolongfei',
+    email: 'zhaolongfei.dev@example.com'
   }
 };
 /*修改分类*/
@@ -147,7 +147,7 @@ export const mockPosts: BlogPost[] = [
     title: '我的2024年技术学习路线图',
     excerpt: '分享我2024年的技术学习计划，包括前端、后端、DevOps等多个领域的学习路径和资源推荐。',
     content: '<h2>前言</h2><p>技术日新月异，制定一个合理的学习计划至关重要...</p>',
-    coverImage: '/images/learning-roadmap.jpg',
+    coverImage: '/images/my-new-cover.jpg',
     author: mockAuthor,
     publishedAt: new Date('2024-01-05'),
     updatedAt: new Date('2024-01-05'),
