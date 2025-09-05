@@ -13,26 +13,47 @@ export interface Author {
 export interface BlogPost {
   id: string;
   title: string;
-  excerpt: string;
+  slug: string;
+  excerpt: string | null;
   content: string;
-  coverImage: string;
-  author: Author;
+  coverImage: string | null;
   publishedAt: Date;
   updatedAt: Date;
   category: string;
-  tags: string[];
-  readTime: number;
-  likes: number;
-  slug: string;
+  tags: string; // Prisma schema中是字符串，需要解析为数组
+  author: {
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+  views: number;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  authorName: string;
+  authorEmail: string;
+  createdAt: Date;
+  updatedAt: Date;
+  postId: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Category {
+  id: string;
   name: string;
   slug: string;
-  count: number;
   color: string;
-  icon?: string;
-  description?: string;
+  count: number;
 }
 
 export interface SearchFilters {

@@ -1,18 +1,35 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { mockCategories, mockPosts } from '@/data/mockData';
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "文章分类 - 技术博客",
+  title: "文章分类 - 栖川闻鹤",
   description: "按主题浏览文章，包括React、Next.js、Tailwind CSS等技术分类，以及生活和思考类文章",
 };
 
-export default function CategoriesPage() {
-  const categoriesWithCount = mockCategories.map(category => ({
+export default async function CategoriesPage() {
+  const [categories, posts] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    }),
+    prisma.post.findMany({
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        excerpt: true,
+        category: true,
+        tags: true,
+        createdAt: true
+      }
+    })
+  ]);
+
+  const categoriesWithCount = categories.map(category => ({
     ...category,
-    postCount: mockPosts.filter(post => post.category === category.name).length
+    postCount: posts.filter(post => post.category === category.name).length
   }));
 
   return (
@@ -37,7 +54,7 @@ export default function CategoriesPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">{category.icon}</span>
+                    <span className="text-2xl">📁</span>
                   </div>
                   <span className="text-sm text-gray-500">
                     {category.postCount} 篇文章
@@ -49,7 +66,7 @@ export default function CategoriesPage() {
                 </h3>
                 
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  {category.description}
+                  探索{category.name}分类下的精彩内容
                 </p>
               </div>
             </Link>
@@ -60,23 +77,23 @@ export default function CategoriesPage() {
         <div className="mt-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">最近文章</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockPosts.slice(0, 4).map((post) => (
+            {posts.slice(0, 4).map((post) => (
               <article key={post.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <div className="p-6">
                   <div className="flex items-center text-sm text-gray-500 mb-2">
                     <span className="bg-gray-100 px-2 py-1 rounded">
-                      {post.category}
+                      {post.category || '未分类'}
                     </span>
                     <span className="mx-2">•</span>
-                    <time>{new Date(post.publishedAt).toLocaleDateString('zh-CN')}</time>
+                    <time>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</time>
                   </div>
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {post.tags.slice(0, 3).map((tag) => (
+                    {post.tags.split(',').slice(0, 3).map((tag) => (
                       <span
-                        key={tag}
+                        key={tag.trim()}
                         className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
                       >
-                        {tag}
+                        {tag.trim()}
                       </span>
                     ))}
                   </div>

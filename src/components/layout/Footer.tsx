@@ -20,7 +20,7 @@ export default function Footer() {
         </div>
         <div className="mt-8 md:order-1 md:mt-0">
           <p className="text-center text-xs leading-5 text-gray-500">
-            &copy; 2024 我的博客. 保留所有权利.
+            &copy; 2025 栖川闻鹤. 保留所有权利.
           </p>
         </div>
       </div>

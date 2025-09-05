@@ -14,40 +14,42 @@ export default function SearchSection({ posts }: SearchSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'latest' | 'oldest' | 'popular'>('latest');
+  const [sortBy, setSortBy] = useState<'latest' | 'oldest'>('latest');
   const [filteredPosts, setFilteredPosts] = useState(posts);
 
   useEffect(() => {
     let filtered = posts;
 
-    // 搜索过滤
+    // Search filtering
     if (searchQuery) {
-      filtered = filtered.filter(post =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      filtered = filtered.filter(post => {
+        const tagsArray = post.tags ? post.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+        return (
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (post.excerpt && post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          tagsArray.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+      });
     }
 
-    // 分类过滤
+    // Category filtering
     if (selectedCategory) {
       filtered = filtered.filter(post => post.category === selectedCategory);
     }
 
-    // 标签过滤
+    // Tags filtering
     if (selectedTags.length > 0) {
-      filtered = filtered.filter(post =>
-        selectedTags.every(tag => post.tags.includes(tag))
-      );
+      filtered = filtered.filter(post => {
+        const tagsArray = post.tags ? post.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+        return selectedTags.every(tag => tagsArray.includes(tag));
+      });
     }
 
-    // 排序
+    // Sorting
     filtered = [...filtered].sort((a, b) => {
       switch (sortBy) {
         case 'oldest':
           return a.publishedAt.getTime() - b.publishedAt.getTime();
-        case 'popular':
-          return b.likes - a.likes;
         default:
           return b.publishedAt.getTime() - a.publishedAt.getTime();
       }
@@ -113,12 +115,11 @@ export default function SearchSection({ posts }: SearchSectionProps) {
             <label className="block text-sm font-medium text-gray-700 mb-2">排序方式</label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'latest' | 'oldest' | 'popular')}
+              onChange={(e) => setSortBy(e.target.value as 'latest' | 'oldest')}
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             >
               <option value="latest">最新发布</option>
               <option value="oldest">最早发布</option>
-              <option value="popular">最多点赞</option>
             </select>
           </div>
 

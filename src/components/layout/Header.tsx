@@ -23,7 +23,7 @@ export default function Header() {
           <Link href="/" className="-m-1.5 p-1.5">
             <span className="sr-only">个人博客</span>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              我的博客
+              栖川闻鹤
             </h1>
           </Link>
         </div>
@@ -73,7 +73,7 @@ export default function Header() {
               <div className="flex items-center justify-between">
                 <Link href="/" className="-m-1.5 p-1.5">
                   <span className="sr-only">个人博客</span>
-                  <h1 className="text-xl font-bold text-indigo-600">我的博客</h1>
+                  <h1 className="text-xl font-bold text-indigo-600">栖川闻鹤</h1>
                 </Link>
                 <button
                   type="button"

@@ -1,15 +1,92 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import BlogCard from '@/components/blog/BlogCard';
-import TagCloud from '@/components/blog/TagCloud';
+
 import CategoryNav from '@/components/blog/CategoryNav';
 import AuthorBio from '@/components/blog/AuthorBio';
 import Link from 'next/link';
-import { mockPosts, mockCategories, mockAuthor, mockTags } from '@/data/mockData';
+import { prisma } from '@/lib/db';
 
-export default function Home() {
-  const recentPosts = mockPosts.slice(0, 6);
 
+export default async function Home() {
+  const posts = await prisma.post.findMany({
+    where: { published: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      coverImage: true,
+      category: true,
+      tags: true,
+      createdAt: true,
+      views: true
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 6,
+  });
+
+  const categories = await prisma.category.findMany({
+    select: {
+      id: true,
+      name: true,
+      slug: true
+    }
+  });
+  
+  const categoryPostCounts = await prisma.post.groupBy({
+    by: ['category'],
+    _count: {
+      category: true
+    }
+  });
+  
+  const categoryPostCountsMap = categoryPostCounts.reduce((acc, count) => {
+    acc[count.category] = count._count.category;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const categoriesWithCount = categories.map(category => ({
+    ...category,
+    count: categoryPostCountsMap[category.name] || 0,
+    color: '#3b82f6'
+  }));
+
+  const siteConfig = await prisma.siteConfig.findFirst();
+  
+  const author = {
+    name: siteConfig?.name || '赵龙飞',
+    avatar: '/images/touxiang.jpg',
+    bio: siteConfig?.description || '热爱技术，专注前端开发，分享学习心得和经验',
+    social: {
+      github: 'https://github.com/example',
+      twitter: 'https://twitter.com/example',
+      linkedin: 'https://linkedin.com/in/example',
+      email: 'minecraftlove1902@outlook.com'
+    }
+  };
+
+  const recentPosts = posts.map(post => ({
+    id: post.id,
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.excerpt || '',
+    content: post.excerpt || '',
+    coverImage: post.coverImage || '',
+    category: post.category,
+    tags: post.tags || '',
+    views: post.views || 0,
+    createdAt: post.createdAt,
+    updatedAt: post.createdAt,
+    publishedAt: post.createdAt,
+    readTime: 5,
+    author: {
+      name: '赵龙飞',
+      email: 'minecraftlove1902@outlook.com',
+      avatar: '/images/touxiang.jpg'
+    }
+  }));
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -23,8 +100,8 @@ export default function Home() {
         <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              欢迎来到我的技术博客
-            </h1>
+                欢迎来到栖川闻鹤
+              </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600">
               分享前端开发、技术思考和项目经验，记录成长历程
             </p>
@@ -71,8 +148,8 @@ export default function Home() {
               </div>
               
               <div className="space-y-4">
-                {mockPosts
-                  .sort((a, b) => b.likes - a.likes)
+                {posts
+                  .sort((a, b) => (b.views || 0) - (a.views || 0))
                   .slice(0, 3)
                   .map((post, index) => (
                     <div key={post.id} className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-4">
@@ -88,7 +165,7 @@ export default function Home() {
                           </Link>
                         </h3>
                         <p className="text-xs text-gray-500 mt-1">
-                          {post.likes} 点赞 · {post.readTime} 分钟阅读
+                          {post.views || 0} 阅读 · 5 分钟阅读
                         </p>
                       </div>
                     </div>
@@ -99,9 +176,9 @@ export default function Home() {
 
           {/* 侧边栏 */}
           <aside className="lg:col-span-1 space-y-6">
-            <AuthorBio author={mockAuthor} postCount={mockPosts.length} />
-            <CategoryNav categories={mockCategories} />
-            <TagCloud tags={mockTags} />
+            <AuthorBio author={author} postCount={posts.length} />
+            <CategoryNav categories={categoriesWithCount} />
+            {/* <TagCloud tags={allTags} /> */}
           </aside>
         </div>
       </main>

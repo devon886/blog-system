@@ -1,34 +1,47 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import AuthorBio from '@/components/blog/AuthorBio';
-import { mockAuthor } from '@/data/mockData';
+import { prisma } from '@/lib/db';
 import { CodeBracketIcon, AcademicCapIcon, UserGroupIcon } from '@heroicons/react/24/outline';
-/*修改技能*/
-export default function AboutPage() {
+export default async function AboutPage() {
+  const siteConfig = await prisma.siteConfig.findFirst();
+  
+  const author = {
+    name: siteConfig?.name || '赵龙飞',
+    avatar: '/images/touxiang.jpg',
+    bio: siteConfig?.description || '热爱技术，专注前端开发，分享学习心得和经验。',
+    social: {
+      github: 'https://github.com/Devon886',
+      douyin: 'https://www.douyin.com/user/self?from_tab_name=main',
+      linkedin: 'https://linkedin.com/in/zhaolongfei',
+      email: 'minecraftlove1902@outlook.com'
+    }
+  };
+
   const skills = [
-    '你的技能1', '你的技能2', '你的技能3', '你的技能4', '你的技能5',
-    '你的技能6', '你的技能7', '你的技能8', '你的技能9', '你的技能10',
-    '你的技能11', '你的技能12', '你的技能13', '你的技能14', '你的技能15'
+    'React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Node.js',
+    'Python', 'Prisma', 'PostgreSQL', 'Git', 'Docker',
+    'CI/CD', 'RESTful API', 'GraphQL', 'AWS', 'Vercel'
   ];
-/*修改工作经历*/
+
   const experiences = [
     {
-      title: '你的职位',
-      company: '你的公司名称',
-      period: '开始年份 - 至今',
-      description: '描述你的工作职责和成就。'
+      title: '全栈开发工程师',
+      company: '某科技公司',
+      period: '2022 - 至今',
+      description: '负责Web应用的全栈开发，使用React、Next.js和Node.js构建高性能的现代化应用。主导多个项目的架构设计和技术选型，推动团队采用最佳实践。'
     },
     {
-      title: '你的前一个职位',
-      company: '前一个公司名称',
-      period: '开始年份 - 结束年份',
-      description: '描述你在前一个工作中的经验和收获。'
+      title: '前端开发工程师',
+      company: '某互联网公司',
+      period: '2020 - 2022',
+      description: '专注于前端开发，使用React和Vue.js构建用户友好的界面。参与多个大型项目的开发，积累了丰富的组件设计和状态管理经验。'
     },
     {
-      title: '你的第一个职位',
-      company: '第一个公司名称',
-      period: '开始年份 - 结束年份',
-      description: '描述你的第一份工作经历。'
+      title: '软件工程师',
+      company: '某初创公司',
+      period: '2018 - 2020',
+      description: '作为早期团队成员参与产品从0到1的开发过程，负责前后端开发和数据库设计，积累了丰富的全栈开发经验。'
     }
   ];
 
@@ -48,7 +61,7 @@ export default function AboutPage() {
 
           {/* 作者介绍 */}
           <div className="mb-12">
-            <AuthorBio author={mockAuthor} />
+            <AuthorBio author={author} />
           </div>
 
           {/* 个人简介 */}
@@ -110,19 +123,19 @@ export default function AboutPage() {
               <div>
                 <h3 className="font-semibold text-gray-900">邮箱</h3>
                 <a
-                  href={`mailto:${mockAuthor.social.email}`}
+                  href={`mailto:${author.social.email}`}
                   className="text-indigo-600 hover:text-indigo-800"
                 >
-                  {mockAuthor.social.email}
+                  {author.social.email}
                 </a>
               </div>
               
               <div>
                 <h3 className="font-semibold text-gray-900">社交媒体</h3>
                 <div className="flex space-x-4 mt-2">
-                  {mockAuthor.social.github && (
+                  {author.social.github && (
                     <a
-                      href={mockAuthor.social.github}
+                      href={author.social.github}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-indigo-600 hover:text-indigo-800"
@@ -130,24 +143,14 @@ export default function AboutPage() {
                       GitHub
                     </a>
                   )}
-                  {mockAuthor.social.twitter && (
+                  {author.social.douyin && (
                     <a
-                      href={mockAuthor.social.twitter}
+                      href={author.social.douyin}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-indigo-600 hover:text-indigo-800"
                     >
-                      Twitter
-                    </a>
-                  )}
-                  {mockAuthor.social.linkedin && (
-                    <a
-                      href={mockAuthor.social.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-800"
-                    >
-                      LinkedIn
+                      抖音
                     </a>
                   )}
                 </div>

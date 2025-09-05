@@ -14,6 +14,12 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post, index = 0 }: BlogCardProps) {
+  // 解析标签字符串为数组
+  const tagsArray = post.tags ? post.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+  
+  // 估算阅读时间（简单实现：每100字1分钟）
+  const readTime = Math.ceil((post.content?.length || 0) / 100);
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -35,14 +41,20 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps) {
       
       <div className="mt-4 flex-1">
         <div className="aspect-[16/9] w-full bg-gray-100 rounded-lg overflow-hidden mb-4">
-          <Image
-            src={post.coverImage}
-            alt={`文章封面图：${post.title}`}
-            width={800}
-            height={450}
-            className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
+          {post.coverImage ? (
+            <Image
+              src={post.coverImage}
+              alt={`文章封面图：${post.title}`}
+              width={800}
+              height={450}
+              className="h-full w-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+              <span className="text-gray-500 text-lg font-medium">{post.title.charAt(0)}</span>
+            </div>
+          )}
         </div>
         
         <h3 className="text-lg font-semibold leading-6 text-gray-900 group-hover:text-indigo-600">
@@ -53,29 +65,29 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps) {
         </h3>
         
         <p className="mt-2 line-clamp-3 text-sm leading-6 text-gray-600">
-          {post.excerpt}
+          {post.excerpt || '暂无摘要...'}
         </p>
         
         <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
           <div className="flex items-center gap-1">
             <ClockIcon className="h-4 w-4" />
-            <span>{post.readTime}分钟阅读</span>
+            <span>{readTime}分钟阅读</span>
           </div>
           
           <div className="flex items-center gap-1">
             <EyeIcon className="h-4 w-4" />
-            <span>{post.likes} 阅读</span>
+            <span>{post.views} 阅读</span>
           </div>
           
           <div className="flex items-center gap-1">
             <TagIcon className="h-4 w-4" />
-            <span>{post.tags.length} 标签</span>
+            <span>{tagsArray.length} 标签</span>
           </div>
         </div>
       </div>
       
       <div className="mt-4 flex flex-wrap gap-2">
-        {post.tags.slice(0, 3).map((tag) => (
+        {tagsArray.slice(0, 3).map((tag) => (
           <span
             key={tag}
             className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10"
@@ -83,21 +95,27 @@ export default function BlogCard({ post, index = 0 }: BlogCardProps) {
             {tag}
           </span>
         ))}
-        {post.tags.length > 3 && (
-          <span className="text-xs text-gray-500">+{post.tags.length - 3}</span>
+        {tagsArray.length > 3 && (
+          <span className="text-xs text-gray-500">+{tagsArray.length - 3}</span>
         )}
       </div>
       
       <div className="mt-4 flex items-center gap-x-4">
         <div className="flex items-center gap-x-2">
-          <Image
-            src={post.author.avatar}
-            alt={`作者头像：${post.author.name}`}
-            width={24}
-            height={24}
-            className="h-6 w-6 rounded-full bg-gray-50"
-            loading="lazy"
-          />
+          {post.author.avatar ? (
+            <Image
+              src={post.author.avatar}
+              alt={`作者头像：${post.author.name}`}
+              width={24}
+              height={24}
+              className="h-6 w-6 rounded-full bg-gray-50"
+              loading="lazy"
+            />
+          ) : (
+            <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center">
+              <span className="text-xs font-medium text-gray-600">{post.author.name.charAt(0)}</span>
+            </div>
+          )}
           <span className="text-sm font-medium text-gray-900">{post.author.name}</span>
         </div>
       </div>

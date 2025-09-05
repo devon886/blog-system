@@ -1,6 +1,6 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { mockCategories, mockPosts } from '@/data/mockData';
+import { prisma } from '@/lib/db';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -8,10 +8,12 @@ import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const category = mockCategories.find(c => c.slug === slug);
+  const category = await prisma.category.findUnique({
+    where: { slug }
+  });
   
   return {
-    title: `${category?.name || '分类'} - 技术博客`,
+    title: `${category?.name || '分类'} - 栖川闻鹤`,
     description: `浏览${category?.name || ''}分类下的所有技术文章，包括${category?.name || ''}相关的最新内容和学习资源`,
   };
 }
@@ -23,7 +25,10 @@ interface CategoryPageProps {
 }
 
 export async function generateStaticParams() {
-  return mockCategories.map((category) => ({
+  const categories = await prisma.category.findMany({
+    select: { slug: true }
+  });
+  return categories.map((category) => ({
     slug: category.slug,
   }));
 }
@@ -31,13 +36,20 @@ export async function generateStaticParams() {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
   
-  const category = mockCategories.find(c => c.slug === slug);
+  const category = await prisma.category.findUnique({
+    where: { slug }
+  });
   
   if (!category) {
     notFound();
   }
 
-  const categoryPosts = mockPosts.filter(post => post.category === category.name);
+  const categoryPosts = await prisma.post.findMany({
+    where: {
+      category: category.name
+    },
+    orderBy: { createdAt: 'desc' }
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -47,7 +59,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         {/* 分类头部 */}
         <div className="text-center mb-12">
           <div className="w-16 h-16 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">{category.icon}</span>
+            <span className="text-3xl">📁</span>
           </div>
           
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -55,7 +67,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </h1>
           
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {category.description}
+            探索{category.name}分类下的精彩文章和技术分享
           </p>
           
           <div className="mt-4">
@@ -72,7 +84,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               <article key={post.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <div className="aspect-w-16 aspect-h-9">
                   <Image
-                    src={post.coverImage}
+                    src={post.coverImage || '/images/default-cover.jpg'}
                     alt={post.title}
                     width={400}
                     height={225}
@@ -82,9 +94,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 
                 <div className="p-6">
                   <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <time>{new Date(post.publishedAt).toLocaleDateString('zh-CN')}</time>
+                    <time>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</time>
                     <span className="mx-2">•</span>
-                    <span>{post.readTime}分钟阅读</span>
+                    <span>5 分钟阅读</span>
                   </div>
                   
                   <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
@@ -98,12 +110,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                   </p>
                   
                   <div className="flex flex-wrap gap-2">
-                    {post.tags.slice(0, 3).map((tag) => (
+                    {post.tags.split(',').slice(0, 3).map((tag) => (
                       <span
-                        key={tag}
+                        key={tag.trim()}
                         className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
                       >
-                        {tag}
+                        {tag.trim()}
                       </span>
                     ))}
                   </div>
